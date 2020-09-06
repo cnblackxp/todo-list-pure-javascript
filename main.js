@@ -38,7 +38,8 @@ function viewList() {
 }
 
 function addItem() {
-  const label = prompt(`enter item ${state.list.length + 1} label (-1 to cancel):`);
+  const { list: { length } } = state;
+  const label = prompt(`enter item ${length + 1} label (-1 to cancel):`);
   if (label === '-1') return;
   const newItem = { label, checked: false };
   state.list = [
@@ -49,8 +50,9 @@ function addItem() {
 }
 
 function selectItem(message) {
+  const { list } = state;
   const index = parseInt(prompt(message + formatList())) - 1;
-  if (state.list[index] === undefined) selectItem();
+  if (list[index] === undefined) selectItem();
   return index;
 }
 
