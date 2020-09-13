@@ -1,93 +1,98 @@
-const state = {
-  list: [
-    {label: 'javascript', checked: true},
-    {label: 'browser', checked: false},
-    {label: 'node', checked: false},
-    {label: 'react', checked: false},
-  ]
-}
+/**
+ *  1- Add Validation for addItem() check if label is empty
+ *  2- Add toggleCheckedItem() command
+ *  3- change formatList() implementation similar to formatCommands() using .map() method
+ *  4- check for user inputing (-1) to abort current command
+ *  5- abstract adding item into a a seprate method
+ * 
+ */
 
-const actions = {
-  'view list': viewList,
-  'add item': addItem,
-  'remove item': removeItem,
-  'edit item': editItem,
-  // 'check item': checkItem,
-  // 'uncheck item': uncheckItem,
-  'exit app': false,
-}
+(function main() {
+    const list = [
+        { label: 'yaser', checked: true },
+        { label: 'omar', checked: true },
+        { label: 'saif', checked: false },
+    ];
 
-const formatItem = (item, index) => 
-  `  ${index + 1} [${item.checked ? 'x' : ' '}] ${item.label}`
 
-const formatList = () => 
-  '\nlist:\n' +
-  state.list.map(formatItem).join('\n')
+    const commands = [
+        { label: 'view list', execute: displayItems },
+        { label: 'add item' , execute: addItem },
+        { label: 'edit item' , execute: editItem },
+        { label: 'remove item' , execute: removeItem },
+        { label: 'exit app' , execute: false },
+        // TODO: 2
+    ]
 
-function mainMenu() {
-  let mainMenuMessage = 'choose option:\n';
-  let i = 0;
-  for (let label in actions) {
-    mainMenuMessage +=  `  ${++i}- ${label}\n`;
-  }
-  return parseInt(prompt(mainMenuMessage)) - 1;
-}
-
-function viewList() {
-  alert(formatList());
-}
-
-function addItem() {
-  const { list: { length } } = state;
-  const label = prompt(`enter item ${length + 1} label (-1 to cancel):`);
-  if (label === '-1') return;
-  const newItem = { label, checked: false };
-  state.list = [
-    ...state.list,
-    newItem,
-  ];
-  console.log('added new item', newItem);
-}
-
-function selectItem(message) {
-  const { list } = state;
-  const index = parseInt(prompt(message + formatList())) - 1;
-  if (list[index] === undefined) selectItem();
-  return index;
-}
-
-function removeItem() {
-  const index = selectItem('enter item index to remove:');
-  // state.list.splice(index);
-  state.list = [
-    ...state.list.slice(0, index),
-    ...state.list.slice(index + 1)
-  ];
-  console.log('removed item', index);
-}
-
-function editItem() {
-  const index = selectItem('enter item index to edit:');
-  const label = prompt('enter new label', state.list[index].label);
-  const newList = [...state.list];
-  newList[index] = {...newList[index], label};
-  state.list = newList;
-  // state.list = state.list.map((item, i) => i == index ? {...item, label} : item);
-  console.log('edited item', index);
-}
-
-function main() {
-  console.log('started app');
-  const option = mainMenu();
-  const actionsLabels = Object.keys(actions);
-  if (actionsLabels[option]) {
-    if (actions[actionsLabels[option]]) {
-      actions[actionsLabels[option]]();
-    } else {
-      return;
+    function formatCommands() {
+        return commands.map(function(element, index) {
+            return `${index+1} - ${element.label}`;
+        }).join('\n');
     }
-  }
-  main();
-}
 
-main();
+
+    function isChecked(checked) {
+        return checked ? "[x]" : "[ ]";
+    }
+
+    function formatList() {
+        // TODO: 3
+        let str = "";
+        for (let i = 0; i < list.length; i ++) {
+            str += (i+1) + " " + isChecked(list[i].checked) + " " + list[i].label + "\n";
+        }
+        return str;
+    }
+
+    function selectIndex(message) {
+        // TODO: 4
+        return parseInt(prompt(message)) - 1;
+    }
+
+
+    function addItem() {
+        const label = prompt("enter new label");
+        // TODO: 1
+        const checked = false;
+        const item = {
+            label,
+            checked,
+        }
+        list.push(item);
+        // TODO: 5
+    }
+
+    function displayItems() {
+        const formattedList = formatList();
+        alert(formattedList);
+    }
+
+    function removeItem() {
+        const indexOfItemToRemove = selectIndex(formatList());
+        list.splice(indexOfItemToRemove, 1);
+    }
+
+    function editItem() {
+        const indexOfItemToEdit = selectIndex(formatList());
+
+        const itemToBeEditted = list[indexOfItemToEdit];
+        const oldLabel = itemToBeEditted.label;
+        const newLabel = prompt('enter new label', oldLabel);
+
+        itemToBeEditted.label = newLabel;
+    }
+
+    function start() {
+        const indexOfCommandToBeExecuted = selectIndex(formatCommands());
+        if (commands[indexOfCommandToBeExecuted]) {
+            if (commands[indexOfCommandToBeExecuted].execute) {
+                commands[indexOfCommandToBeExecuted].execute();
+            } else {
+                return;
+            }
+        }
+        start();
+    }
+
+    start();
+})();
